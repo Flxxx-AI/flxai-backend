@@ -66,7 +66,7 @@ app.post('/api/chat-with-image', async (req, res) => {
     }
     
     const completion = await groq.chat.completions.create({
-      model: 'llava-v1.5-7b',  // ← MODELO DE VISIÓN ACTIVO
+      model: 'llama-3.2-11b-vision-preview',
       messages: [
         {
           role: 'user',
