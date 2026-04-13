@@ -54,9 +54,13 @@ app.post('/api/chat-with-image', async (req, res) => {
   try {
     const { message, imageBase64, language } = req.body;
     
-    const textPrompt = message || (language === 'es' 
-      ? 'Describe esta imagen de forma detallada' 
-      : 'Describe this image in detail');
+    const textPrompt = (message && typeof message === 'string' && message.trim() !== '') 
+      ? message 
+      : (language === 'es' ? 'Describe esta imagen' : 'Describe this image');
+    
+    if (!imageBase64 || typeof imageBase64 !== 'string') {
+      throw new Error('Invalid image data');
+    }
     
     const completion = await groq.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
@@ -70,11 +74,12 @@ app.post('/api/chat-with-image', async (req, res) => {
         }
       ],
       temperature: 0.3,
-      max_tokens: 1000
+      max_tokens: 500
     });
     
     res.json({ success: true, response: completion.choices[0].message.content.trim() });
   } catch (error) {
+    console.error('Error in /api/chat-with-image:', error);
     res.json({ success: false, error: error.message });
   }
 });
