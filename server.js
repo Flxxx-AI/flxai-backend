@@ -7,30 +7,28 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '100mb' }));
 
-// Tu API key está SEGURA en el servidor
 const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY  // ← Solo tú sabes esto
+  apiKey: process.env.GROQ_API_KEY
 });
 
-// Endpoint para chat normal
 app.post('/api/chat', async (req, res) => {
   try {
     const { message, language } = req.body;
     
     const systemPrompt = language === 'es' 
-      ? 'Eres FlxAI_, un asistente de IA premium... Responde en ESPAÑOL.'
-      : 'You are FlxAI_, a premium AI assistant... Answer in ENGLISH.';
+      ? 'Responde con UNA frase corta. Máximo 8 palabras. Directo al grano.'
+      : 'Answer with ONE short sentence. Max 8 words. Direct to the point.';
     
     const completion = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: 'llama3-8b-8192',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: message }
       ],
       temperature: 0,
-      max_tokens: 60
+      max_tokens: 50
     });
     
     res.json({ success: true, response: completion.choices[0].message.content.trim() });
@@ -39,24 +37,27 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
-// Endpoint para imágenes
 app.post('/api/chat-with-image', async (req, res) => {
   try {
     const { message, imageBase64, language } = req.body;
     
+    const textPrompt = message || (language === 'es' 
+      ? 'Describe en 5 palabras' 
+      : 'Describe in 5 words');
+    
     const completion = await groq.chat.completions.create({
-      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+      model: 'llama3-8b-8192',
       messages: [
         {
           role: 'user',
           content: [
-            { type: 'text', text: message || (language === 'es' ? 'Describe esta imagen' : 'Describe this image') },
+            { type: 'text', text: textPrompt },
             { type: 'image_url', image_url: { url: imageBase64 } }
           ]
         }
       ],
-      temperature: 0.3,
-      max_tokens: 150
+      temperature: 0,
+      max_tokens: 50
     });
     
     res.json({ success: true, response: completion.choices[0].message.content.trim() });
