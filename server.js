@@ -13,6 +13,7 @@ const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY
 });
 
+// ========== ENDPOINT PARA TEXTO (NO imágenes) ==========
 app.post('/api/chat', async (req, res) => {
   try {
     const { message, language } = req.body;
@@ -35,7 +36,7 @@ Your name is FlxAI_.
 Answer directly and concisely.`;
     
     const completion = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: 'llama-3.3-70b-versatile',  // ← MODELO PARA TEXTO
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: message }
@@ -46,10 +47,12 @@ Answer directly and concisely.`;
     
     res.json({ success: true, response: completion.choices[0].message.content.trim() });
   } catch (error) {
+    console.error('Error in /api/chat:', error);
     res.json({ success: false, error: error.message });
   }
 });
 
+// ========== ENDPOINT PARA IMÁGENES ==========
 app.post('/api/chat-with-image', async (req, res) => {
   try {
     const { message, imageBase64, language } = req.body;
@@ -63,7 +66,7 @@ app.post('/api/chat-with-image', async (req, res) => {
     }
     
     const completion = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: 'llama-3.2-90b-vision-preview',  // ← MODELO PARA IMÁGENES
       messages: [
         {
           role: 'user',
@@ -74,7 +77,7 @@ app.post('/api/chat-with-image', async (req, res) => {
         }
       ],
       temperature: 0.3,
-      max_tokens: 500
+      max_tokens: 1000
     });
     
     res.json({ success: true, response: completion.choices[0].message.content.trim() });
