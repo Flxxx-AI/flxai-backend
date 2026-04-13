@@ -52,7 +52,7 @@ Answer directly and concisely.`;
   }
 });
 
-// ========== ENDPOINT PARA IMÁGENES ==========
+// ========== ENDPOINT PARA IMÁGENES (CON EL MODELO CORRECTO) ==========
 app.post('/api/chat-with-image', async (req, res) => {
   try {
     const { message, imageBase64, language } = req.body;
@@ -66,7 +66,7 @@ app.post('/api/chat-with-image', async (req, res) => {
     }
     
     const completion = await groq.chat.completions.create({
-      model: 'llama-3.2-11b-vision-preview',
+      model: 'meta-llama/llama-4-scout-17b-16e-instruct',  // ← MODELO DE VISIÓN ACTIVO
       messages: [
         {
           role: 'user',
