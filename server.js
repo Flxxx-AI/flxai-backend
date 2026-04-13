@@ -13,7 +13,7 @@ const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY
 });
 
-// ========== ENDPOINT PARA TEXTO (NO imágenes) ==========
+// ========== ENDPOINT PARA TEXTO ==========
 app.post('/api/chat', async (req, res) => {
   try {
     const { message, language } = req.body;
@@ -36,7 +36,7 @@ Your name is FlxAI_.
 Answer directly and concisely.`;
     
     const completion = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',  // ← MODELO PARA TEXTO
+      model: 'llama-3.3-70b-versatile',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: message }
@@ -66,7 +66,7 @@ app.post('/api/chat-with-image', async (req, res) => {
     }
     
     const completion = await groq.chat.completions.create({
-      model: 'llama-3.2-90b-vision-preview',  // ← MODELO PARA IMÁGENES
+      model: 'llava-v1.5-7b',  // ← MODELO DE VISIÓN ACTIVO
       messages: [
         {
           role: 'user',
@@ -77,7 +77,7 @@ app.post('/api/chat-with-image', async (req, res) => {
         }
       ],
       temperature: 0.3,
-      max_tokens: 1000
+      max_tokens: 500
     });
     
     res.json({ success: true, response: completion.choices[0].message.content.trim() });
