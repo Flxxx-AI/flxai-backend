@@ -18,17 +18,17 @@ app.post('/api/chat', async (req, res) => {
     const { message, language } = req.body;
     
     const systemPrompt = language === 'es' 
-      ? 'Responde con UNA frase corta. Máximo 8 palabras. Directo al grano.'
-      : 'Answer with ONE short sentence. Max 8 words. Direct to the point.';
+      ? 'Responde de forma completa y detallada. No cortes la respuesta.'
+      : 'Answer completely and thoroughly. Do not cut the response.';
     
     const completion = await groq.chat.completions.create({
-      model: 'llama3-8b-8192',
+      model: 'llama-3.3-70b-versatile',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: message }
       ],
-      temperature: 0,
-      max_tokens: 50
+      temperature: 0.3,
+      max_tokens: 2000  // ← AUMENTADO
     });
     
     res.json({ success: true, response: completion.choices[0].message.content.trim() });
@@ -42,11 +42,11 @@ app.post('/api/chat-with-image', async (req, res) => {
     const { message, imageBase64, language } = req.body;
     
     const textPrompt = message || (language === 'es' 
-      ? 'Describe en 5 palabras' 
-      : 'Describe in 5 words');
+      ? 'Describe esta imagen de forma detallada' 
+      : 'Describe this image in detail');
     
     const completion = await groq.chat.completions.create({
-      model: 'llama3-8b-8192',
+      model: 'llama-3.3-70b-versatile',
       messages: [
         {
           role: 'user',
@@ -56,8 +56,8 @@ app.post('/api/chat-with-image', async (req, res) => {
           ]
         }
       ],
-      temperature: 0,
-      max_tokens: 50
+      temperature: 0.3,
+      max_tokens: 1000
     });
     
     res.json({ success: true, response: completion.choices[0].message.content.trim() });
